@@ -1,0 +1,2 @@
+﻿Tarih,Model,Veri Durumu,Accuracy (Genel),Precision (Kesinlik),Recall (Sahtekarı Yakalama),F1-Score,Kaçan Sahtekarlar (FN),Yanlış Alarmlar (FP)
+2026-05-01 19:13:07,Random Forest,SMOTE Uygulandı (Eğitim Setine),%99.95,%87.37,%84.69,%86.01,15,12
