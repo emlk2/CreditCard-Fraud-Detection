@@ -1,0 +1,9 @@
+fastapi==0.100.0
+uvicorn
+pydantic<2
+joblib
+scikit-learn
+pandas
+slowapi
+pytest
+httpx

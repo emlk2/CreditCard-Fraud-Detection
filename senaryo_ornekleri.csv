@@ -1,0 +1,4 @@
+﻿Senaryo,Amount,Hour,V14,Sahtekarlık Olasılığı (%)
+Normal Kahve Alışı,5,8,0.012064392184377496,0.0
+Şüpheli Harcama (V14 anormal),500,2,-6.971722894107602,0.0
+Çok Şüpheli (Tüm Vler anormal),500,2,-6.971722894107602,13.0
