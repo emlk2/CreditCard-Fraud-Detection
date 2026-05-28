@@ -1,147 +1,92 @@
-# Kredi Kartı Sahtekarlık Tespiti (Credit Card Fraud Detection) 🚀
+# Kredi Kartı Sahtekarlık Tespiti ve Kişiye Özel Risk Skorlama Sistemi
 
-Bu proje, finansal işlemlerdeki sahtekarlıkları (fraud) tespit etmek amacıyla geliştirilmiş uçtan uca (end-to-end) bir Makine Öğrenimi ve API projesidir.
+Bu proje, kredi kartı işlemlerinde sahtekarlık ihtimalini tespit etmek amacıyla geliştirilmiş bir makine öğrenmesi ve API tabanlı risk analiz sistemidir.
 
-Gerçek dünya veri setlerindeki en büyük problemlerden biri olan **Veri Dengesizliği (Data Imbalance)** sorunu, bu projede sentetik veri üretme yöntemleriyle çözülmüş ve eğitilen model dış dünyanın kullanımına bir REST API olarak sunulmuştur.
+Projenin ilk aşamasında Kaggle üzerindeki **Credit Card Fraud Detection** veri seti kullanılarak Random Forest algoritması ile sahtekarlık tahmin modeli eğitilmiştir. Daha sonra bu model FastAPI ile servis haline getirilmiş ve kullanıcıdan gelen işlem verilerine göre anlık tahmin yapabilecek hale getirilmiştir.
 
-## 🛠️ Kullanılan Teknolojiler ve Yöntemler
-* **Dil:** Python
-* **Makine Öğrenimi:** Scikit-Learn, Random Forest Classifier
-* **Veri Ön İşleme & Dengeleme:** Pandas, Numpy, **SMOTE** (Synthetic Minority Over-sampling Technique)
-* **Backend & API:** FastAPI, Uvicorn
-* **Loglama:** Otomatik Excel/CSV Performans Raporlaması
-* **Güvenlik:** API Key Authentication, Rate Limiting, CORS
-* **Test:** Pytest
-* **CI/CD:** GitHub Actions
+Projenin geliştirilmiş versiyonunda ise sadece genel model tahminiyle yetinilmemiş, kullanıcıya özel risk skorlama motoru eklenmiştir. Böylece aynı işlem, farklı kullanıcı profillerine göre farklı risk seviyelerinde değerlendirilebilmektedir.
 
-## 🧠 Makine Öğrenimi Yaklaşımı
-Kredi kartı veri setlerinde "Sahte" işlemler, tüm işlemlerin %1'inden bile azdır. Modelin tembelleşip sürekli "Normal" tahmini yapmasını engellemek için **sadece eğitim veri setine** SMOTE uygulanarak azınlık sınıfı çoğaltılmıştır.
+---
 
-Modelin başarısı değerlendirilirken Accuracy (Doğruluk) yerine, sahtekarları kaçırmama oranını ifade eden **Recall (Duyarlılık)** metriğine odaklanılmıştır. Random Forest modeli ile test verisinde yüksek bir Recall skoru elde edilmiştir.
+## Projenin Amacı
 
-## 🚀 API Nasıl Çalıştırılır?
-Projedeki yapay zeka modeli eğitildikten sonra `.pkl` formatında paketlenmiş ve FastAPI ile canlıya alınmıştır.
+Finansal işlemlerdeki olağandışı hareketleri tespit ederek sahtekarlık riskini azaltmak amaçlanmıştır.
 
-1. Gerekli kütüphaneleri kurun:
+Bu sistem:
 
-```bash
-pip install -r requirements.txt
-```
+- Kredi kartı işlemlerini makine öğrenmesi modeliyle analiz eder.
+- İşlemin sahtekarlık olasılığını hesaplar.
+- Kullanıcının kişisel harcama alışkanlıklarını dikkate alır.
+- Risk seviyesine göre işlem onayı, ek doğrulama veya geçici durdurma önerisi üretir.
 
-2. Uygulamayı çalıştırın:
+---
 
-```bash
-uvicorn src.main:app --reload
-```
+## Kullanılan Veri Seti
 
-API, http://127.0.0.1:8000 adresinde çalışacaktır.
+Projede Kaggle üzerinde yer alan **Credit Card Fraud Detection** veri seti kullanılmıştır.
 
-## 📚 API Dokümantasyonu
+Veri setinde:
 
-API, FastAPI ile geliştirilmiştir ve otomatik Swagger UI dokümantasyonu http://127.0.0.1:8000/docs adresinde mevcuttur.
+- `Time`: İşlemin zaman bilgisi
+- `Amount`: İşlem tutarı
+- `V1` - `V28`: PCA dönüşümü uygulanmış anonim özellikler
+- `Class`: Hedef değişken
 
-### Endpoint'ler
+bulunmaktadır.
 
-#### GET /
-Ana sayfa endpoint'i. API'nin aktif olduğunu doğrular.
+`Class` sütununda:
 
-**Headers:**
-- `X-API-Key`: API anahtarı (varsayılan: "your-secret-api-key")
+- `0`: Normal işlem
+- `1`: Sahte işlem
 
-**Response:**
-```json
-{
-  "message": "Fraud Detection API is Active!"
-}
-```
+anlamına gelmektedir.
 
-#### POST /predict
-Tek bir işlem için sahtekarlık tahmini yapar.
+---
 
-**Headers:**
-- `X-API-Key`: API anahtarı
+## V1 - V28 Sütunları Nedir?
 
-**Request Body:**
-```json
-{
-  "Time": 1.0,
-  "V1": -1.0,
-  "V2": 2.0,
-  "V3": -3.0,
-  "V4": 4.0,
-  "V5": -5.0,
-  "V6": 6.0,
-  "V7": -7.0,
-  "V8": 8.0,
-  "V9": -9.0,
-  "V10": 10.0,
-  "V11": -11.0,
-  "V12": 12.0,
-  "V13": -13.0,
-  "V14": 14.0,
-  "V15": -15.0,
-  "V16": 16.0,
-  "V17": -17.0,
-  "V18": 18.0,
-  "V19": -19.0,
-  "V20": 20.0,
-  "V21": -21.0,
-  "V22": 22.0,
-  "V23": -23.0,
-  "V24": 24.0,
-  "V25": -25.0,
-  "V26": 26.0,
-  "V27": -27.0,
-  "V28": 28.0,
-  "Amount": 100.0
-}
-```
+Veri setindeki `V1`, `V2`, ..., `V28` sütunları gerçek ham değişkenler değildir. Bu sütunlar, gizlilik nedeniyle PCA yöntemiyle dönüştürülmüş sayısal bileşenlerdir.
 
-**Response:**
-```json
-{
-  "result": "Normal",
-  "confidence": 0.95
-}
-```
+Bu nedenle `V14 kesin olarak konumdur` veya `V10 IP adresidir` gibi bir yorum yapılamaz. Bu değişkenler, orijinal işlem özelliklerinin matematiksel dönüşüm sonucu elde edilmiş anonim halleridir.
 
-### Güvenlik
-- API Key gereklidir. Ortam değişkeni `API_KEY` ile ayarlayın.
-- Rate limiting: Home 10/dakika, Predict 100/dakika.
-- CORS etkin.
+Modelleme açısından bu değişkenlerin sahtekarlık tespitinde ne kadar etkili olduğu feature importance yöntemiyle analiz edilebilir.
 
-## 🧪 Testler
-Testleri çalıştırmak için:
+---
 
-```bash
-pytest tests/
-```
+## Kullanılan Teknolojiler
 
-## 📁 Proje Yapısı
-```
-.
-├── src/
-│   ├── __init__.py
-│   ├── main.py          # FastAPI app
-│   ├── models.py        # Pydantic models
-│   ├── routes.py        # API endpoints
-│   └── utils.py         # Utility functions
-├── tests/
-│   └── test_api.py      # API tests
-├── .github/
-│   └── workflows/
-│       └── ci.yml       # GitHub Actions CI
-├── veri_analizi.ipynb   # Data analysis notebook
-├── creditcard.csv       # Dataset
-├── Model_Performans_Raporu.csv  # Performance report
-├── requirements.txt     # Dependencies
-└── README.md
-```
+- Python
+- Pandas
+- Scikit-learn
+- Imbalanced-learn / SMOTE
+- Random Forest Classifier
+- FastAPI
+- Pydantic
+- Joblib
+- Swagger UI
+- Git / GitHub
 
-## 🔧 Kurulum ve Çalıştırma
-1. Repository'yi klonlayın.
-2. Virtual environment oluşturun: `python -m venv .venv`
-3. Aktifleştirin: `.venv\Scripts\activate` (Windows)
-4. Bağımlılıkları yükleyin: `pip install -r requirements.txt`
-5. Modeli eğitmek için notebook'u çalıştırın.
-6. API'yi başlatın: `uvicorn src.main:app --reload`
+---
+
+## Proje Akışı
+
+```text
+Veri setinin yüklenmesi
+        ↓
+Sınıf dağılımının incelenmesi
+        ↓
+X ve y olarak ayrılması
+        ↓
+Train-test split işlemi
+        ↓
+SMOTE ile eğitim verisinin dengelenmesi
+        ↓
+Random Forest modelinin eğitilmesi
+        ↓
+Model performansının değerlendirilmesi
+        ↓
+Modelin joblib ile kaydedilmesi
+        ↓
+FastAPI ile API haline getirilmesi
+        ↓
+Kişiye özel risk motorunun eklenmesi
