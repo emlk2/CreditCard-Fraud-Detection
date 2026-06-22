@@ -17,6 +17,8 @@ app = FastAPI(
 from fastapi.responses import HTMLResponse
 from fastapi.responses import HTMLResponse
 
+from fastapi.responses import HTMLResponse
+
 @app.get("/", response_class=HTMLResponse)
 def arayuz_simulasyonu():
     html_icerik = """
@@ -29,32 +31,38 @@ def arayuz_simulasyonu():
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; color: #333; }
-            .dashboard-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 500px; width: 100%; text-align: center; }
-            .header-icon { font-size: 50px; color: #2a5298; margin-bottom: 15px; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; color: #333; padding: 20px; box-sizing: border-box;}
+            .dashboard-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 800px; width: 100%; text-align: center; }
+            .header-icon { font-size: 40px; color: #2a5298; margin-bottom: 10px; }
             h2 { margin-top: 0; color: #1e3c72; font-size: 24px; }
-            p { color: #666; font-size: 15px; margin-bottom: 30px; line-height: 1.6; }
-            .btn-group { display: flex; flex-direction: column; gap: 15px; }
-            .btn { border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; color: white; }
-            .btn-safe { background-color: #28a745; box-shadow: 0 4px 15px rgba(40,167,69,0.3); }
-            .btn-safe:hover { background-color: #218838; transform: translateY(-2px); }
-            .btn-warning { background-color: #ffc107; color: #000; box-shadow: 0 4px 15px rgba(255,193,7,0.3); }
-            .btn-warning:hover { background-color: #e0a800; transform: translateY(-2px); }
-            .btn-danger { background-color: #dc3545; box-shadow: 0 4px 15px rgba(220,53,69,0.3); }
-            .btn-danger:hover { background-color: #c82333; transform: translateY(-2px); }
+            p { color: #666; font-size: 14px; margin-bottom: 20px; }
+            .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+            .btn-load { border: 1px solid #ccc; background: #f8f9fa; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; color: #333; }
+            .btn-load:hover { background: #e2e6ea; }
+            .code-editor { width: 100%; height: 350px; background: #282c34; color: #abb2bf; font-family: 'Courier New', Courier, monospace; font-size: 14px; padding: 15px; border-radius: 8px; border: none; outline: none; resize: vertical; box-sizing: border-box; text-align: left; }
+            .btn-submit { background-color: #28a745; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s ease; margin-top: 20px; width: 100%; box-shadow: 0 4px 15px rgba(40,167,69,0.3); }
+            .btn-submit:hover { background-color: #218838; transform: translateY(-2px); }
         </style>
     </head>
     <body>
         <div class="dashboard-card">
             <i class="fa-solid fa-shield-halved header-icon"></i>
-            <h2>Hibrit Anti-Fraud Motoru</h2>
-            <p>Makine öğrenmesi ve kural tabanlı algoritmaların gerçek zamanlı entegrasyonunu test etmek için aşağıdaki senaryolardan birini seçin.</p>
+            <h2>Anti-Fraud Manuel Analiz Paneli</h2>
+            <p>Aşağıdaki alana kendi JSON verinizi girebilir veya üstteki butonlarla örnek senaryo yükleyerek sonuçları test edebilirsiniz.</p>
+            
             <div class="btn-group">
-                <button class="btn btn-safe" onclick="testSenaryosu('dusuk')"><i class="fa-solid fa-check-circle"></i> Düşük Riskli İşlem Gönder</button>
-                <button class="btn btn-warning" onclick="testSenaryosu('orta')"><i class="fa-solid fa-triangle-exclamation"></i> Şüpheli İşlem Gönder (Kural Motoru)</button>
-                <button class="btn btn-danger" onclick="testSenaryosu('yuksek')"><i class="fa-solid fa-skull-crossbones"></i> Sahtekarlık (Fraud) İşlemi Gönder</button>
+                <button class="btn-load" onclick="ornekYukle('dusuk')">🟢 Düşük Risk Örneği Yükle</button>
+                <button class="btn-load" onclick="ornekYukle('orta')">🟡 Orta Risk Örneği Yükle</button>
+                <button class="btn-load" onclick="ornekYukle('yuksek')">🔴 Yüksek Risk Örneği Yükle</button>
             </div>
+
+            <textarea id="jsonInput" class="code-editor" spellcheck="false"></textarea>
+
+            <button class="btn-submit" onclick="veriyiAnalizEt()">
+                <i class="fa-solid fa-microchip"></i> SİSTEME GÖNDER VE ANALİZ ET
+            </button>
         </div>
+
         <script>
             const senaryolar = {
                 'dusuk': {
@@ -71,26 +79,57 @@ def arayuz_simulasyonu():
                 }
             };
 
-            async function testSenaryosu(tip) {
-                Swal.fire({ title: 'Yapay Zeka Analiz Ediyor...', html: 'Veriler Random Forest ve Kural Motorundan geçiriliyor.', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+            // Sayfa açıldığında varsayılan olarak Düşük Riski yükle
+            window.onload = function() {
+                ornekYukle('dusuk');
+            };
+
+            // Kutuya örnek veriyi basan fonksiyon
+            function ornekYukle(tip) {
+                const kutu = document.getElementById('jsonInput');
+                // JSON'u şık bir şekilde (4 boşluklu) kutuya yazdır
+                kutu.value = JSON.stringify(senaryolar[tip], null, 4);
+            }
+
+            // Ana işlem fonksiyonu
+            async function veriyiAnalizEt() {
+                const kutuIcerigi = document.getElementById('jsonInput').value;
+                let gonderilecekVeri;
+
+                // 1. Önce kullanıcının girdiği verinin doğru bir JSON olup olmadığını kontrol ediyoruz
+                try {
+                    gonderilecekVeri = JSON.parse(kutuIcerigi);
+                } catch (error) {
+                    Swal.fire({ icon: 'error', title: 'Format Hatası!', text: 'Girdiğiniz veri geçerli bir JSON formatında değil. Lütfen parantezleri ve virgülleri kontrol edin.' });
+                    return;
+                }
+
+                // 2. Yükleme ekranı çıkarıyoruz
+                Swal.fire({ title: 'Yapay Zeka Analiz Ediyor...', html: 'Verileriniz Random Forest ve Kural Motorundan geçiriliyor.', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+                
+                // 3. API'ye gönderiyoruz
                 try {
                     const response = await fetch('/tahmin-gelismis', { 
                         method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json'
-                            // API Şifresi tamamen kaldırıldı!
-                        },
-                        body: JSON.stringify(senaryolar[tip])
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(gonderilecekVeri)
                     });
                     
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        Swal.fire({ icon: 'error', title: 'API Hatası (' + response.status + ')', text: JSON.stringify(errorData) });
+                        return;
+                    }
+
                     const data = await response.json();
                     
-                    if (tip === 'yuksek' || data.risk_kategorisi === "Yüksek Risk") {
-                        Swal.fire({ icon: 'error', title: '🚨 İŞLEM REDDEDİLDİ!', html: `<div style="text-align: left; background: #f8d7da; padding: 15px; border-radius: 8px; margin-top: 10px;"><b>Sistem Kararı:</b> ${data.sonuc || 'Sahtekarlık Şüphesi Var'}<br><b>Risk Seviyesi:</b> Yüksek Risk<br><b>Aksiyon:</b> İşlem bloke edildi ve karta geçici kısıtlama konuldu.</div>`, confirmButtonText: 'Güvenlik Ekiplerine Bildir', confirmButtonColor: '#dc3545' });
-                    } else if (tip === 'orta' || data.risk_kategorisi === "Orta Risk") {
-                        Swal.fire({ icon: 'warning', title: '⚠️ ŞÜPHELİ İŞLEM TESPİTİ', html: `<div style="text-align: left; background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 10px;"><b>Sistem Kararı:</b> Cihaz veya Saat Anormalliği<br><b>Risk Seviyesi:</b> Orta Risk<br><b>Aksiyon:</b> Müşteriye 3D Secure SMS doğrulama kodu gönderildi.</div>`, confirmButtonText: 'Doğrulama Bekle', confirmButtonColor: '#ffc107' });
+                    // 4. Sonuca göre o şık pencereleri patlatıyoruz
+                    if (data.risk_kategorisi === "Yüksek Risk" || data.tahmin_sinifi === 1) {
+                        Swal.fire({ icon: 'error', title: '🚨 İŞLEM REDDEDİLDİ!', html: `<div style="text-align: left; background: #f8d7da; padding: 15px; border-radius: 8px; margin-top: 10px; color:#721c24;"><b>Sistem Kararı:</b> ${data.sonuc || 'Sahtekarlık Şüphesi'}<br><b>Risk Seviyesi:</b> Yüksek Risk<br><b>Aksiyon:</b> İşlem bloke edildi ve karta geçici kısıtlama konuldu.</div>`, confirmButtonText: 'Kapat', confirmButtonColor: '#dc3545' });
+                    } else if (data.risk_kategorisi === "Orta Risk") {
+                        Swal.fire({ icon: 'warning', title: '⚠️ ŞÜPHELİ İŞLEM TESPİTİ', html: `<div style="text-align: left; background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 10px; color:#856404;"><b>Sistem Kararı:</b> Cihaz veya Saat Anormalliği<br><b>Risk Seviyesi:</b> Orta Risk<br><b>Aksiyon:</b> Müşteriye 3D Secure SMS doğrulama kodu gönderildi.</div>`, confirmButtonText: 'Kapat', confirmButtonColor: '#ffc107' });
                     } else {
-                        Swal.fire({ icon: 'success', title: '✅ İŞLEM ONAYLANDI', html: `<div style="text-align: left; background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 10px;"><b>Sistem Kararı:</b> Anomali Bulunamadı<br><b>Risk Seviyesi:</b> Düşük Risk<br><b>Aksiyon:</b> Tutar hesaptan düşüldü.</div>`, confirmButtonText: 'Kapat', confirmButtonColor: '#28a745' });
+                        Swal.fire({ icon: 'success', title: '✅ İŞLEM ONAYLANDI', html: `<div style="text-align: left; background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 10px; color:#155724;"><b>Sistem Kararı:</b> Anomali Bulunamadı<br><b>Risk Seviyesi:</b> Düşük Risk<br><b>Aksiyon:</b> Tutar hesaptan düşüldü.</div>`, confirmButtonText: 'Kapat', confirmButtonColor: '#28a745' });
                     }
                 } catch (error) {
                     Swal.fire({ icon: 'question', title: 'Bağlantı Hatası', text: 'API sunucusuna ulaşılamıyor.' });
