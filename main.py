@@ -14,6 +14,176 @@ app = FastAPI(
     version="1.1.0"
 )
 
+    from fastapi.responses import HTMLResponse
+
+@app.get("/", response_class=HTMLResponse)
+def arayuz_simulasyonu():
+    html_icerik = """
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Anti-Fraud Karar Motoru | Canlı Test Paneli</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                height: 100vh;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: #333;
+            }
+            .dashboard-card {
+                background: white;
+                padding: 40px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                max-width: 500px;
+                width: 100%;
+                text-align: center;
+            }
+            .header-icon {
+                font-size: 50px;
+                color: #2a5298;
+                margin-bottom: 15px;
+            }
+            h2 { margin-top: 0; color: #1e3c72; font-size: 24px; }
+            p { color: #666; font-size: 15px; margin-bottom: 30px; line-height: 1.6; }
+            .btn-group { display: flex; flex-direction: column; gap: 15px; }
+            .btn {
+                border: none;
+                padding: 15px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                color: white;
+            }
+            .btn-safe { background-color: #28a745; box-shadow: 0 4px 15px rgba(40,167,69,0.3); }
+            .btn-safe:hover { background-color: #218838; transform: translateY(-2px); }
+            .btn-warning { background-color: #ffc107; color: #000; box-shadow: 0 4px 15px rgba(255,193,7,0.3); }
+            .btn-warning:hover { background-color: #e0a800; transform: translateY(-2px); }
+            .btn-danger { background-color: #dc3545; box-shadow: 0 4px 15px rgba(220,53,69,0.3); }
+            .btn-danger:hover { background-color: #c82333; transform: translateY(-2px); }
+        </style>
+    </head>
+    <body>
+
+        <div class="dashboard-card">
+            <i class="fa-solid fa-shield-halved header-icon"></i>
+            <h2>Hibrit Anti-Fraud Motoru</h2>
+            <p>Makine öğrenmesi ve kural tabanlı algoritmaların gerçek zamanlı entegrasyonunu test etmek için aşağıdaki senaryolardan birini seçin.</p>
+            
+            <div class="btn-group">
+                <button class="btn btn-safe" onclick="testSenaryosu('dusuk')">
+                    <i class="fa-solid fa-check-circle"></i> Düşük Riskli İşlem Gönder
+                </button>
+                <button class="btn btn-warning" onclick="testSenaryosu('orta')">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Şüpheli İşlem Gönder (Kural Motoru)
+                </button>
+                <button class="btn btn-danger" onclick="testSenaryosu('yuksek')">
+                    <i class="fa-solid fa-skull-crossbones"></i> Sahtekarlık (Fraud) İşlemi Gönder
+                </button>
+            </div>
+        </div>
+
+        <script>
+            // Hazırladığımız 3 farklı senaryo verisi
+            const senaryolar = {
+                'dusuk': {
+                    "islem": { "Time": 45000, "V1": -0.42, "V2": 0.15, "V3": 1.25, "V4": -0.30, "V5": 0.50, "V6": -0.15, "V7": 0.30, "V8": 0.05, "V9": -0.20, "V10": 0.10, "V11": -0.60, "V12": 0.40, "V13": -0.10, "V14": 0.50, "V15": -0.15, "V16": 0.20, "V17": -0.20, "V18": 0.10, "V19": -0.05, "V20": 0.05, "V21": -0.10, "V22": -0.25, "V23": 0.05, "V24": 0.10, "V25": -0.20, "V26": 0.05, "V27": -0.05, "V28": 0.02, "Amount": 55.00 },
+                    "kullanici_profili": { "user_id": "USR-1001", "ortalama_tutar": 120.00, "maksimum_normal_tutar": 500.00, "normal_baslangic_saati": 8, "normal_bitis_saati": 22, "ulke_uygun_mu": true, "guvenilir_cihaz_mi": true }
+                },
+                'orta': {
+                    "islem": { "Time": 14400, "V1": -1.50, "V2": 1.20, "V3": -0.80, "V4": 1.50, "V5": -0.90, "V6": 0.60, "V7": -0.70, "V8": 0.40, "V9": -0.90, "V10": -1.10, "V11": 1.20, "V12": -1.30, "V13": 0.30, "V14": -1.20, "V15": 0.50, "V16": -0.90, "V17": -1.10, "V18": -0.40, "V19": 0.60, "V20": 0.25, "V21": 0.20, "V22": 0.45, "V23": -0.15, "V24": -0.30, "V25": 0.30, "V26": -0.20, "V27": 0.10, "V28": -0.05, "Amount": 3250.50 },
+                    "kullanici_profili": { "user_id": "USR-1002", "ortalama_tutar": 300.00, "maksimum_normal_tutar": 2500.00, "normal_baslangic_saati": 9, "normal_bitis_saati": 23, "ulke_uygun_mu": true, "guvenilir_cihaz_mi": false }
+                },
+                'yuksek': {
+                    "islem": { "Time": 10800, "V1": -5.20, "V2": 4.50, "V3": -7.80, "V4": 6.10, "V5": -3.50, "V6": -2.10, "V7": -6.50, "V8": 2.80, "V9": -4.20, "V10": -7.50, "V11": 5.80, "V12": -8.90, "V13": -1.20, "V14": -9.50, "V15": 1.10, "V16": -5.60, "V17": -10.50, "V18": -4.20, "V19": 1.80, "V20": 0.90, "V21": 1.10, "V22": -0.60, "V23": -0.35, "V24": -0.20, "V25": 0.60, "V26": 0.45, "V27": 1.20, "V28": -0.30, "Amount": 9500.00 },
+                    "kullanici_profili": { "user_id": "USR-1003", "ortalama_tutar": 85.00, "maksimum_normal_tutar": 800.00, "normal_baslangic_saati": 8, "normal_bitis_saati": 21, "ulke_uygun_mu": false, "guvenilir_cihaz_mi": false }
+                }
+            };
+
+            async function testSenaryosu(tip) {
+                // Şık yükleme ekranı
+                Swal.fire({
+                    title: 'Yapay Zeka Analiz Ediyor...',
+                    html: 'Veriler Random Forest ve Kural Motorundan geçiriliyor.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading() }
+                });
+
+                try {
+                    // Kullanıcı profili verisi de gerektiren gelişmiş tahmin uç noktasına (tahmin-gelismis) istek atıyoruz
+                    const response = await fetch('/tahmin-gelismis', { 
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(senaryolar[tip])
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // İşlem tipine ve dönen cevaba göre Popup tasarımı
+                    if (tip === 'yuksek' || data.risk_kategorisi === "Yüksek Risk") {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '🚨 İŞLEM REDDEDİLDİ!',
+                            html: `<div style="text-align: left; background: #f8d7da; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                                   <b>Sistem Kararı:</b> ${data.sonuc || 'Sahtekarlık Şüphesi Var'}<br>
+                                   <b>Risk Seviyesi:</b> Yüksek Risk<br>
+                                   <b>Aksiyon:</b> İşlem bloke edildi ve karta geçici kısıtlama konuldu.
+                                   </div>`,
+                            confirmButtonText: 'Güvenlik Ekiplerine Bildir',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    } else if (tip === 'orta' || data.risk_kategorisi === "Orta Risk") {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '⚠️ ŞÜPHELİ İŞLEM TESPİTİ',
+                            html: `<div style="text-align: left; background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                                   <b>Sistem Kararı:</b> Cihaz veya Saat Anormalliği<br>
+                                   <b>Risk Seviyesi:</b> Orta Risk<br>
+                                   <b>Aksiyon:</b> Müşteriye 3D Secure SMS doğrulama kodu gönderildi.
+                                   </div>`,
+                            confirmButtonText: 'Doğrulama Bekle',
+                            confirmButtonColor: '#ffc107'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '✅ İŞLEM ONAYLANDI',
+                            html: `<div style="text-align: left; background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                                   <b>Sistem Kararı:</b> Anomali Bulunamadı<br>
+                                   <b>Risk Seviyesi:</b> Düşük Risk<br>
+                                   <b>Aksiyon:</b> Tutar hesaptan düşüldü.
+                                   </div>`,
+                            confirmButtonText: 'Kapat',
+                            confirmButtonColor: '#28a745'
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'question',
+                        title: 'Bağlantı Hatası',
+                        text: 'API sunucusuna ulaşılamıyor. Lütfen logları kontrol edin.'
+                    });
+                }
+            }
+        </script>
+    </body>
+    </html>
+    """
+    return html_icerik
 
 # Kaydedilen model paketini yüklüyoruz.
 try:
@@ -252,3 +422,4 @@ def gelismis_tahmin_et(veri: GelismisTahminVerisi):
             status_code=500,
             detail=f"Gelişmiş tahmin sırasında hata oluştu: {str(hata)}"
         )
+    
