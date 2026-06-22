@@ -126,9 +126,14 @@ def arayuz_simulasyonu():
                 try {
                     // Kullanıcı profili verisi de gerektiren gelişmiş tahmin uç noktasına (tahmin-gelismis) istek atıyoruz
                     const response = await fetch('/tahmin-gelismis', { 
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(senaryolar[tip])
+    method: 'POST',
+    headers: { 
+        'Content-Type': 'application/json',
+        'x-api-key': 'SENIN_GIZLI_API_ANAHTARIN' // API kodunda ne belirlediysen buraya onu yaz
+        // Not: Eğer güvenlik adını "access_token" veya "Authorization" yaptıysan sol tarafı ona göre değiştir.
+    },
+    body: JSON.stringify(senaryolar[tip])
+});
                     });
                     
                     const data = await response.json();
